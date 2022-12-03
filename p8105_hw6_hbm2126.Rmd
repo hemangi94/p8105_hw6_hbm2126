@@ -63,12 +63,35 @@ baltimore_fit = baltimore_regress %>%
 
 baltimore_fit_stats = baltimore_fit %>% 
   broom::tidy(conf.int = TRUE) %>%  
-  mutate(OR = exp(estimate)) %>% 
-  select(term, OR, conf.low, conf.high) %>% 
+  mutate(
+    OR = exp(estimate),
+    OR_conf.low = exp(conf.low),
+    OR_conf.high = exp(conf.high)
+    ) %>% 
+  select(term, OR, OR_conf.low, OR_conf.high) %>% 
   filter(term == "victim_sexMale")
 
 baltimore_fit_stats
-
   
 ```
+
+```{r}
+city_fit = homicides_df %>% 
+  nest(data = -city_state) %>% 
+  mutate(
+    all_cities = map(data, ~glm(case_solved ~ victim_age + victim_sex + victim_race, data = ., family = binomial())),
+    model_results = map(all_cities, broom::tidy,conf.int = TRUE)
+  ) %>% 
+  select(city_state, model_results) %>% 
+  unnest(cols = model_results) %>% 
+  mutate(
+    OR = exp(estimate),
+    OR_conf.low = exp(conf.low),
+    OR_conf.high = exp(conf.high)
+  ) %>% 
+  select(city_state, term, OR, OR_conf.low, OR_conf.high) %>% 
+  filter(term == "victim_sexMale")
+  
+```
+
 
