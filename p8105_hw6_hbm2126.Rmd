@@ -27,3 +27,23 @@ scale_fill_discrete = scale_fill_viridis_d
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
+
+### Problem 1
+
+
+
+### Problem 2
+
+
+```{r}
+homicides_df = 
+  read_csv("data/homicide-data.csv") %>% 
+  mutate(
+    city_state = str_c(city, ", ", state ),
+    case_solved = case_when(disposition == "Open/No arrest" | disposition == "Closed without arrest" ~ "No", disposition == "Closed by arrest" ~ "Yes"),
+    victim_age = as.numeric(victim_age)
+  ) %>% 
+  subset(!(city_state %in% c("Dallas, TX", "Tulsa, AL", "Phoenix, AZ", "Kansas City, MO"))) %>% 
+  subset(victim_race %in% c("White", "Black"))
+
+```
