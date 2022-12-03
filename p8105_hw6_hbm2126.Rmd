@@ -90,7 +90,15 @@ city_fit = homicides_df %>%
     OR_conf.high = exp(conf.high)
   ) %>% 
   select(city_state, term, OR, OR_conf.low, OR_conf.high) %>% 
-  filter(term == "victim_sexMale")
+  filter(term == "victim_sexMale") %>% 
+  arrange(OR)
+
+homicides_OR_plot = ggplot(data = city_fit, aes(x = reorder(city_state, OR), y = OR)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymax = OR_conf.high, ymin = OR_conf.low)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  
+homicides_OR_plot
   
 ```
 
