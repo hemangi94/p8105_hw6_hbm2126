@@ -49,6 +49,26 @@ homicides_df =
 ```
 
 ```{r}
+baltimore_regress = homicides_df %>% 
+  filter(
+    city_state == "Baltimore, MD"
+  ) %>% 
+  mutate(
+    victim_sex = fct_relevel(victim_sex, "Female"),
+    victim_race = fct_relevel(victim_race, "White")
+  )
 
+baltimore_fit = baltimore_regress %>% 
+  glm(case_solved ~ victim_age + victim_sex + victim_race, data = ., family = binomial())
+
+baltimore_fit_stats = baltimore_fit %>% 
+  broom::tidy(conf.int = TRUE) %>%  
+  mutate(OR = exp(estimate)) %>% 
+  select(term, OR, conf.low, conf.high) %>% 
+  filter(term == "victim_sexMale")
+
+baltimore_fit_stats
+
+  
 ```
 
