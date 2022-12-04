@@ -13,9 +13,9 @@ library(modelr)
 
 
 knitr::opts_chunk$set(
-	echo = TRUE,
-	warning = FALSE,
-	fig.width = 8, 
+  echo = TRUE,
+  warning = FALSE,
+  fig.width = 8, 
   fig.height = 6,
   out.width = "90%"
 )
@@ -70,12 +70,12 @@ baltimore_fit_stats = baltimore_fit %>%
     OR = exp(estimate),
     OR_conf.low = exp(conf.low),
     OR_conf.high = exp(conf.high)
-    ) %>% 
+  ) %>% 
   select(term, OR, OR_conf.low, OR_conf.high) %>% 
   filter(term == "victim_sexMale")
 
 baltimore_fit_stats
-  
+
 ```
 
 ```{r}
@@ -100,9 +100,9 @@ homicides_OR_plot = ggplot(data = city_fit, aes(x = reorder(city_state, OR), y =
   geom_point() + 
   geom_errorbar(aes(ymax = OR_conf.high, ymin = OR_conf.low)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
-  
+
 homicides_OR_plot
-  
+
 ```
 
 
@@ -121,7 +121,7 @@ birthweights_df =
 
 ```{r}
 birthweights_fit = lm(bwt ~ malform + blength + babysex, data = birthweights_df)
-  
+
 ```
 
 ```{r}
@@ -149,4 +149,45 @@ birthweights_df %>%
   geom_point()
 ```
 
+```{r}
+model_df = 
+  crossv_mc(birthweights_df, 100)
+```
+
+```{r}
+model_df = 
+  model_df %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+```
+
+```{r}
+model_df = 
+  model_df %>% 
+  mutate(
+    bw_model1 = map(train, ~lm(bwt ~ malform + blength + babysex, data = .x)),
+    bw_model2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+    bw_model3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*blength*babysex, data = .x))
+  )%>% 
+  mutate(
+    rmse_model1 = map2_dbl(bw_model1, test, ~rmse(model = .x, data = .y)),
+    rmse_model2 = map2_dbl(bw_model2, test, ~rmse(model = .x, data = .y)),
+    rmse_model3 = map2_dbl(bw_model3, test, ~rmse(model = .x, data = .y))
+  )
+```
+
+
+```{r}
+model_df %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
+```
 
