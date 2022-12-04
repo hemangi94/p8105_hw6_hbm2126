@@ -132,4 +132,21 @@ birthweights_df %>%
   geom_point()
 ```
 
+```{r}
+birthweights_df %>% 
+  modelr::add_residuals(birthweights_fit) %>% 
+  add_predictions(birthweights_fit) %>% 
+  ggplot(aes(x = blength, y = resid)) +
+  geom_point()
+```
+
+
+```{r}
+birthweights_df %>% 
+  modelr::add_residuals(birthweights_fit) %>% 
+  add_predictions(birthweights_fit) %>% 
+  ggplot(aes(x = babysex, y = resid)) +
+  geom_point()
+```
+
 
