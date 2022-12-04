@@ -119,3 +119,17 @@ birthweights_df =
   )
 ```
 
+```{r}
+birthweights_fit = lm(bwt ~ malform + blength + babysex, data = birthweights_df)
+  
+```
+
+```{r}
+birthweights_df %>% 
+  modelr::add_residuals(birthweights_fit) %>% 
+  add_predictions(birthweights_fit) %>% 
+  ggplot(aes(x = malform, y = resid)) +
+  geom_point()
+```
+
+
